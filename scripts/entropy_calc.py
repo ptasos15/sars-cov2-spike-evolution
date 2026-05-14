@@ -7,7 +7,7 @@ def shannon_entropy(column):
     freqs = {}
     total = 0
     for aa in column:
-        if aa != '-':  # αγνοούμε gaps
+        if aa != '-':  # we ignore gaps
             freqs[aa] = freqs.get(aa, 0) + 1
             total += 1
     entropy = 0
