@@ -216,3 +216,25 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# macOS
+.DS_Store
+
+# IQ-TREE intermediate files
+*.bionj
+*.ckp.gz
+*.mldist
+*.splits.nex
+*.contree
+*.iqtree
+*.log
+
+# Temporary alignment files
+*.tmp
+
+# R session files
+.Rhistory
+.RData
+
+# Conda environments
+conda-meta/
