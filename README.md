@@ -1,4 +1,3 @@
-# sars-cov2-spike-evolution
 # SARS-CoV-2 Spike Protein Evolution Analysis
 
 ## Overview
