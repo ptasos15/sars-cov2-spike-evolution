@@ -5,7 +5,7 @@ import math
 import sys
 
 def calc_entropy(freqs):
-    """Υπολογίζει Shannon entropy σε bits για μία θέση"""
+    """Calculate Shannon entropy in bits for one position"""
     total = sum(freqs.values())
     entropy = 0
     for aa, count in freqs.items():
@@ -23,7 +23,7 @@ print("Pos\tConsensus\tEntropy\tFrequencies")
 for i in range(alignment_length):
     col = [record.seq[i] for record in alignment]
     freqs = Counter(col)
-    # Βγάζουμε τα gaps και τα unknown X αν θέλουμε
+    # remove gaps and unknown X amino acids from alignments
     filtered_freqs = {aa: c for aa, c in freqs.items() if aa != '-' and aa != 'X'}
     if filtered_freqs:
         consensus = max(filtered_freqs, key=filtered_freqs.get)
