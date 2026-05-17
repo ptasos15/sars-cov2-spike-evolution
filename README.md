@@ -31,6 +31,42 @@ data/           Processed datasets and metadata
 - conserved_positions.py :
   Identifies conserved amino acid positions across alignments.
 
+## Phylogenetic Tree Visualization
+Phylogenetic trees were visualized and annotated using the Interactive Tree of Life (iTOL) platform. Custom Python scripts were developed to automatically assign country-specific color annotations based on sequence metadata extracted from Newick tree labels.
+
+Countries were color-coded as follows:
+
+- Greece → light blue
+- Italy → green
+- France → orange
+- Germany → yellow
+- Spain → purple
+- Slovakia → pink
+- Russia → red
+- United Kingdom → turquoise
+
+The script generates iTOL-compatible DATASET_COLORSTRIP annotation files for visualization of geographic clustering patterns.
+
+## Lineage Annotation and Visualization
+SARS-CoV-2 phylogenetic trees were additionally annotated according to Pangolin lineage classifications. Sequence headers were reformatted to include accession number, lineage assignment and country metadata prior to tree reconstruction.
+
+Custom annotation files compatible with the Interactive Tree of Life (iTOL) platform were generated using Python scripts, enabling lineage-specific and country-specific color visualization of phylogenetic clustering patterns.
+
+## Entropy Analysis and Statistical Visualization
+Shannon entropy profiles were calculated across aligned Spike protein amino acid sequences to quantify site-specific variability.
+
+Entropy analyses included:
+
+- Greece 2020 Spike dataset
+- Europe 2022 Spike dataset
+- ΔEntropy comparison between datasets
+- Smoothed entropy profiles
+- Receptor-Binding Domain (RBD) highlighting
+- Volcano-style variability plots
+- Mean entropy comparison between populations
+
+Statistical visualization and plotting were performed in R using custom scripts and ggplot2.
+
 ## Data Availability
 Sequence datasets were obtained from the NCBI Virus Database. Processed datasets, metadata and analysis outputs used in this study are included in this repository and in the Supplementary Material associated with the manuscript.
 
