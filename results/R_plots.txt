@@ -1,0 +1,241 @@
+############################################################
+# SARS-CoV-2 Spike Entropy Analysis and Visualization
+# Greece 2020 vs Europe 2022
+############################################################
+
+##########################
+# Load libraries
+##########################
+library(ggplot2)
+
+##########################
+# 1. Alignment preprocessing
+##########################
+
+# Number of alignment columns
+ncol(greece_mat)
+ncol(europe_mat)
+
+# Keep only common positions
+min_cols <- min(ncol(greece_mat), ncol(europe_mat))
+
+greece_mat_trim <- greece_mat[, 1:min_cols]
+europe_mat_trim <- europe_mat[, 1:min_cols]
+
+# Filter positions with >=50% valid amino acids
+keep_greece <- colSums(greece_mat_trim != "-" &
+                       greece_mat_trim != "X") / nrow(greece_mat_trim) >= 0.5
+
+keep_europe <- colSums(europe_mat_trim != "-" &
+                       europe_mat_trim != "X") / nrow(europe_mat_trim) >= 0.5
+
+keep_both <- keep_greece & keep_europe
+
+# Filtered matrices
+greece_mat_filt <- greece_mat_trim[, keep_both, drop = FALSE]
+europe_mat_filt <- europe_mat_trim[, keep_both, drop = FALSE]
+
+##########################
+# 2. Shannon entropy calculation
+##########################
+
+greece_entropy <- shannon_entropy(greece_mat_filt)
+europe_entropy <- shannon_entropy(europe_mat_filt)
+
+positions <- 1:length(greece_entropy)
+
+# ΔEntropy
+delta_entropy <- europe_entropy - greece_entropy
+
+##########################
+# 3. Raw entropy profile
+##########################
+
+png("plots/entropy_raw.png", width = 1400, height = 900, res = 150)
+
+plot(positions,
+     europe_entropy,
+     type = "l",
+     col = "red",
+     lwd = 2,
+     xlab = "Spike Position",
+     ylab = "Shannon Entropy",
+     main = "Entropy per Position")
+
+lines(positions,
+      greece_entropy,
+      col = "blue",
+      lwd = 2)
+
+legend("topright",
+       legend = c("Europe 2022", "Greece 2020"),
+       col = c("red", "blue"),
+       lwd = 2)
+
+dev.off()
+
+##########################
+# 4. Smoothed entropy profile + RBD
+##########################
+
+europe_smooth <- smooth.spline(positions, europe_entropy)
+greece_smooth <- smooth.spline(positions, greece_entropy)
+
+png("plots/entropy_smoothed_rbd.png",
+    width = 1400,
+    height = 900,
+    res = 150)
+
+plot(europe_smooth,
+     col = "red",
+     lwd = 3,
+     xlab = "Spike Position",
+     ylab = "Shannon Entropy",
+     main = "Smoothed Entropy Profile")
+
+lines(greece_smooth,
+      col = "blue",
+      lwd = 3)
+
+# Highlight RBD region
+rect(319,
+     0,
+     541,
+     max(c(europe_entropy, greece_entropy)),
+     col = rgb(0.8, 0.8, 0.8, 0.3),
+     border = NA)
+
+legend("topright",
+       legend = c("Europe 2022",
+                  "Greece 2020",
+                  "RBD Region"),
+       col = c("red", "blue", NA),
+       lwd = c(3, 3, NA),
+       pch = c(NA, NA, 15),
+       pt.cex = 2)
+
+dev.off()
+
+##########################
+# 5. Volcano-style ΔEntropy plot
+##########################
+
+df <- data.frame(
+  Position = positions,
+  Greece = greece_entropy,
+  Europe = europe_entropy,
+  Delta = delta_entropy
+)
+
+df$Europe_entropy <- europe_entropy
+
+png("plots/delta_entropy_volcano.png",
+    width = 1400,
+    height = 900,
+    res = 150)
+
+ggplot(df,
+       aes(x = Position,
+           y = Delta,
+           color = Europe_entropy,
+           size = Europe_entropy)) +
+  geom_point(alpha = 0.7) +
+  scale_color_gradient(low = "blue",
+                       high = "red") +
+  geom_hline(yintercept = 0,
+             linetype = "dashed",
+             color = "black") +
+  labs(
+    x = "Spike Position",
+    y = expression(Delta * "Entropy"),
+    title = "ΔEntropy Across Spike Protein"
+  ) +
+  theme_minimal()
+
+dev.off()
+
+##########################
+# 6. Comparative entropy plot
+##########################
+
+png("plots/entropy_comparison_rbd.png",
+    width = 1400,
+    height = 900,
+    res = 150)
+
+ggplot(df, aes(x = Position)) +
+
+  geom_line(aes(y = Europe,
+                color = "Europe 2022"),
+            linewidth = 1.2) +
+
+  geom_line(aes(y = Greece,
+                color = "Greece 2020"),
+            linewidth = 1.2) +
+
+  annotate("rect",
+           xmin = 319,
+           xmax = 541,
+           ymin = -Inf,
+           ymax = Inf,
+           fill = "gray",
+           alpha = 0.3) +
+
+  scale_color_manual(values = c(
+    "Europe 2022" = "red",
+    "Greece 2020" = "blue"
+  )) +
+
+  labs(
+    y = "Shannon Entropy",
+    title = "Entropy Profiles with RBD Highlight"
+  ) +
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+dev.off()
+
+##########################
+# 7. Mean entropy barplot
+##########################
+
+bar_df <- data.frame(
+  Region = c("Greece 2020", "Europe 2022"),
+  MeanEntropy = c(
+    mean(greece_entropy),
+    mean(europe_entropy)
+  )
+)
+
+png("plots/mean_entropy_barplot.png",
+    width = 1200,
+    height = 800,
+    res = 150)
+
+ggplot(bar_df,
+       aes(x = Region,
+           y = MeanEntropy,
+           fill = Region)) +
+
+  geom_bar(stat = "identity",
+           width = 0.5) +
+
+  scale_fill_manual(values = c(
+    "Greece 2020" = "blue",
+    "Europe 2022" = "red"
+  )) +
+
+  labs(
+    y = "Mean Shannon Entropy",
+    title = "Average Spike Entropy by Region"
+  ) +
+
+  theme_minimal() +
+  theme(legend.position = "none")
+
+dev.off()
+
+############################################################
+# End of script
+############################################################
